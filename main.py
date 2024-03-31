@@ -2,23 +2,16 @@ from flask import Flask, jsonify
 from flask_restful import Api, Resource
 from flask_cors import CORS
 import requests
-import numpy as np
-import json
 
 from failure_predictor import FailurePredictor
 
 
 failrePredictor = FailurePredictor()
 
-app = Flask(__name__)
-api = Api(app)
-CORS(app)
-
 
 # class for getting the server resource usage
 class get_resource_usage_metrics(Resource):
     def get(self):
-
         resource_data_api_url = "http://192.168.8.152:5000/get-resource-usage"  # URL of the API to get the resource usage metrics
         try:
             response = requests.get(resource_data_api_url)
@@ -34,21 +27,15 @@ class get_resource_usage_metrics(Resource):
 # class for getting the prediction results
 class get_prediction_results(Resource):
     def get(self):
-
         prediction_data_api_url = "http://192.168.8.152:5000/get-prediction-data"  # URL of the API to get the failure prediction data
         try:
             response = requests.get(prediction_data_api_url)
         except requests.exceptions.RequestException as e:
-            print("error: ", e)
             return jsonify({"error": "Failed to call data streamer"})
 
         if response.status_code == 200:
             data = response.json()
             prediction_data = data["prediction_data"]
-
-            print(
-                json.dumps(prediction_data, indent=2)
-            )  # remove this line after testing
 
             if len(prediction_data) == 0:
                 return jsonify(
@@ -63,7 +50,7 @@ class get_prediction_results(Resource):
                 )
 
             if len(prediction_data) > 10:
-                prediction_data = prediction_data[-10:]
+                prediction_data = prediction_data[-20:]
 
             (
                 log_predictions,
@@ -72,11 +59,6 @@ class get_prediction_results(Resource):
                 time_stamps,
                 failure_probabilities,
             ) = failrePredictor.get_predictions(prediction_data)
-
-            print("time_stamps: ", time_stamps)
-            print("log_predictions: ", log_predictions)
-            print("resource_predictions: ", resource_predictions)
-            print("combined_predictions: ", combined_predictions)
 
             return jsonify(
                 {
@@ -93,10 +75,13 @@ class get_prediction_results(Resource):
             return jsonify({"error": "Internal server error in data streamer"})
 
 
-# adding the routes
-api.add_resource(get_resource_usage_metrics, "/get-resource-usage-metrics")
-api.add_resource(get_prediction_results, "/get-prediction-results")
-
-
 if __name__ == "__main__":
+    app = Flask(__name__)
+    api = Api(app)
+    CORS(app)
+
+    # adding the routes
+    api.add_resource(get_resource_usage_metrics, "/get-resource-usage-metrics")
+    api.add_resource(get_prediction_results, "/get-prediction-results")
+
     app.run(debug=False, port=8080)

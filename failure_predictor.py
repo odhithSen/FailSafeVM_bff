@@ -1,9 +1,7 @@
 import numpy as np
 import tensorflow as tf
 import joblib
-from tensorflow import keras
-from sklearn.preprocessing import MinMaxScaler
-import os
+from os.path import dirname
 
 # data persistence
 RESOURCE_DATA_ARR = []
@@ -14,13 +12,12 @@ NUMBER_OF_CONTENDERS = 20
 # new mse_threshold = 0.026266402162838112
 MSE_THRESHOLD = 0.5396
 NO_OF_STEPS = 20
-SCALER = joblib.load("scaler.gz")
+SCALER = joblib.load(f"{dirname(__file__)}/models/scaler.gz")
 SCALER.feature_names_in_ = None  # This is to avoid the redundant warning message
 
 # Loading the saved models
-log_model = tf.keras.models.load_model("deeplog_LSTM_model_final_v2.keras")
-resource_model = tf.keras.models.load_model("autoencoder_resource_NN_model_v4.keras")
-
+log_model = tf.keras.models.load_model(f"{dirname(__file__)}/models/LSTM_log_model.keras")
+resource_model = tf.keras.models.load_model(f"{dirname(__file__)}/models/autoencoder_resource_model.keras")
 
 class FailurePredictor:
 
