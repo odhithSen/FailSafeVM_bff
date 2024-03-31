@@ -9,8 +9,7 @@ LOG_DATA_ARR = []
 FAILURE_PROBABILITY_ARR = []
 
 NUMBER_OF_CONTENDERS = 20
-# new mse_threshold = 0.026266402162838112
-MSE_THRESHOLD = 0.5396
+MSE_THRESHOLD = 0.0262
 NO_OF_STEPS = 20
 SCALER = joblib.load(f"{dirname(__file__)}/models/scaler.gz")
 SCALER.feature_names_in_ = None  # This is to avoid the redundant warning message
